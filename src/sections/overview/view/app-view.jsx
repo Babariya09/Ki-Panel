@@ -16,10 +16,10 @@ import { DashUSer } from 'src/_mock/dash';
 // import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
 
-import UserTableHead from 'src/sections/user/user-table-head';
 import TableEmptyRows from 'src/sections/user/table-empty-rows';
 
 import DashTabelRow from './DashTabelRow';
+import DashTabelHead from './DashTabelHead.jsx';
 import AppWidgetSummary from '../app-widget-summary';
 import { emptyRows, applyFilter, getComparator } from '../util';
 
@@ -140,13 +140,13 @@ export default function AppView() {
 
       </Container>
 
-      <Card>
+      <Card style={{ marginTop:"20px" }}>
 
 
-        <Scrollbar>
+        <Scrollbar >
           <TableContainer sx={{ overflow: 'unset' }}>
             <Table sx={{ minWidth: 800 }}>
-              <UserTableHead
+              <DashTabelHead
                 order={order}
                 orderBy={orderBy}
                 rowCount={DashUSer.length}
@@ -159,7 +159,6 @@ export default function AppView() {
                 ]}
               />
               <TableBody>
-                {console.log(dataFiltered)}
                 {dataFiltered
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((row) => (

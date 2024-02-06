@@ -44,6 +44,7 @@ export default function UserTableRow({
   selected,
   name,
   avatarUrl,
+  email,
   role,
   handleClick,
 }) {
@@ -108,6 +109,8 @@ export default function UserTableRow({
         </TableCell>
 
         <TableCell>{role}</TableCell>
+
+        <TableCell>{email}</TableCell>
 
 
         <TableCell align="right">
@@ -179,6 +182,7 @@ export default function UserTableRow({
               </Grid>
             </Grid>
             <Button variant="contained" href="#contained-buttons" style={{ marginTop: "12px", marginRight: "12px" }}>
+            <Iconify icon="ph:pencil" />
               Submit
             </Button>
             <Button variant="outlined" onClick={handleClose} style={{ marginTop: "12px" }}>Close</Button>
@@ -231,5 +235,6 @@ UserTableRow.propTypes = {
   handleClick: PropTypes.func,
   name: PropTypes.any,
   role: PropTypes.any,
+  email: PropTypes.any,
   selected: PropTypes.any,
 };

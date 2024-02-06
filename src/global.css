@@ -1,4 +1,8 @@
 /* scrollbar */
 @import 'simplebar-react/dist/simplebar.min.css';
 
-
+.css-j2ehrc-MuiTableCell-root {
+    display: flex !important;
+    justify-content: center !important;
+}
+    

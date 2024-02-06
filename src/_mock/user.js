@@ -7,6 +7,7 @@ export const users = [...Array(24)].map((_, index) => ({
   id: faker.string.uuid(),
   avatarUrl: `/assets/images/avatars/avatar_${index + 1}.jpg`,
   name: faker.person.fullName(),
+  email: `${faker.person.firstName()}@gmail.com`,
   role: sample([
     'Leader',
     'Hr Manager',

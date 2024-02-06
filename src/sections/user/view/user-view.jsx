@@ -1,9 +1,13 @@
 import { useState } from 'react';
 
+import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
+import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Unstable_Grid2';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
@@ -23,6 +27,18 @@ import UserTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
 
 // ----------------------------------------------------------------------
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 500,
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  pt: 2,
+  px: 4,
+  pb: 3,
+};
 
 export default function UserPage() {
   const [page, setPage] = useState(0);
@@ -54,11 +70,11 @@ export default function UserPage() {
     setSelected([]);
   };
 
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
+  const handleClick = (event, email) => {
+    const selectedIndex = selected.indexOf(email);
     let newSelected = [];
     if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
+      newSelected = newSelected.concat(selected, email);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
     } else if (selectedIndex === selected.length - 1) {
@@ -94,14 +110,83 @@ export default function UserPage() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
+    // ------ New User Create Modal Open ------
+
+    const [openModal, setModalOpen] = useState(false);
+    const handleOpen = () => {
+      setModalOpen(true);
+    };
+  
+    const handleClose = () => {
+      setModalOpen(false);
+    };
+
   return (
     <Container>
       <Stack direction="row" alignItems="center" justifyContent="space-between" mb={5}>
         <Typography variant="h4">Users</Typography>
 
-        <Button variant="contained" color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
+        <Button variant="contained" onClick={handleOpen} color="inherit" startIcon={<Iconify icon="eva:plus-fill" />}>
           New User
         </Button>
+
+
+        {/* ------ Modal Box For New User Create Start ------ */}
+
+        <Modal
+          open={openModal}
+          aria-labelledby="child-modal-title"
+          aria-describedby="child-modal-description"
+        >
+          <Box sx={{ ...style, width: 500 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between" style={{ marginBottom: "12px" }}>
+              <Typography variant="h4">Add Users</Typography>
+            </Stack>
+            <Grid container spacing={3}>
+              <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
+                <TextField
+                  id="outlined-required"
+                  label="Name"
+                  style={{ width: "100%" }}
+                />
+              </Grid>
+
+              <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
+                <TextField
+                  required
+                  id="outlined-required"
+                  label="Email"
+                  style={{ width: "100%" }}
+                />
+              </Grid>
+
+              <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
+                <TextField
+                  required
+                  id="outlined-required"
+                  label="Password"
+                  style={{ width: "100%" }}
+                />
+              </Grid>
+
+              <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
+                <TextField
+                  id="outlined-required"
+                  label="Role"
+                  style={{ width: "100%" }}
+                />
+              </Grid>
+            </Grid>
+            <Button variant="contained" href="#contained-buttons" style={{ marginTop: "12px", marginRight: "12px" }}>
+            <Iconify icon="ic:baseline-plus" />
+              Add User
+            </Button>
+            <Button variant="outlined" onClick={handleClose} style={{ marginTop: "12px" }}>Close</Button>
+          </Box>
+        </Modal>
+
+        {/* ------ Modal Box For New User Create End ------ */}
+
       </Stack>
 
       <Card>
@@ -123,7 +208,14 @@ export default function UserPage() {
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'role', label: 'Role' },
+                  { id: 'role', label: 'Role' },  
+                  { id: 'email', label: 'Email' },
+                  { id: 'action', label: 'Action', style: { 
+        display: 'flex', 
+        justifyContent: 'center', 
+        alignItems: 'center' // Optional if you want to center vertically
+        /* Add other custom styles here */ 
+      }},
                 ]}
               />
               <TableBody>
@@ -134,6 +226,7 @@ export default function UserPage() {
                       key={row.id}
                       name={row.name}
                       role={row.role}
+                      email={row.email}
                       avatarUrl={row.avatarUrl}
                       selected={selected.indexOf(row.name) !== -1}
                       handleClick={(event) => handleClick(event, row.name)}

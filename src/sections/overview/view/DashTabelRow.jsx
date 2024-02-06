@@ -15,7 +15,7 @@ export default function DashTabelRow({
     
     return (
         <TableRow hover>
-            <TableCell component="th" scope="row" padding="none">
+            <TableCell component="th" scope="row" padding="none" style={{ padding:"20px" }}>
                 <Stack direction="row" alignItems="center" spacing={2}>
                     <Typography variant="subtitle2" noWrap>
                         {Date}
