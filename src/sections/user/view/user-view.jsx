@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -14,7 +14,7 @@ import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
-import { users } from 'src/_mock/user';
+import { BASE_URL } from 'src/Base_Url/Baseurl';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -25,6 +25,7 @@ import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
+
 
 // ----------------------------------------------------------------------
 const style = {
@@ -52,6 +53,8 @@ export default function UserPage() {
   const [filterName, setFilterName] = useState('');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const [users, setUsers] = useState([]);
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -110,16 +113,44 @@ export default function UserPage() {
 
   const notFound = !dataFiltered.length && !!filterName;
 
-    // ------ New User Create Modal Open ------
+  // ------ New User Create Modal Open ------
 
-    const [openModal, setModalOpen] = useState(false);
-    const handleOpen = () => {
-      setModalOpen(true);
-    };
-  
-    const handleClose = () => {
-      setModalOpen(false);
-    };
+  const [openModal, setModalOpen] = useState(false);
+  const handleOpen = () => {
+    setModalOpen(true);
+  };
+
+  const handleClose = () => {
+    setModalOpen(false);
+  };
+
+  // ---------------- All User Data Show Api Calling ---------------------
+
+
+  // Other state variables and functions remain unchanged
+
+  useEffect(() => {
+    // Define your API endpoint
+    const apiUrl = `${BASE_URL}user/list`;
+
+    // Fetch data from the API
+    fetch(apiUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        // Check if the data is an array before setting it to the state
+        if (Array.isArray(data)) {
+          setUsers(data);
+          console.log("Data", data);
+        } else {
+          console.error('Invalid data format. Expected an array.', data);
+          // You can handle this case by setting users to an empty array or showing an error message
+          setUsers([]);
+        }
+      })
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+      });
+  }, []);
 
   return (
     <Container>
@@ -162,15 +193,6 @@ export default function UserPage() {
 
               <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
                 <TextField
-                  required
-                  id="outlined-required"
-                  label="Password"
-                  style={{ width: "100%" }}
-                />
-              </Grid>
-
-              <Grid xs={12} sm={6} md={3} style={{ width: "100%" }}>
-                <TextField
                   id="outlined-required"
                   label="Role"
                   style={{ width: "100%" }}
@@ -178,7 +200,7 @@ export default function UserPage() {
               </Grid>
             </Grid>
             <Button variant="contained" href="#contained-buttons" style={{ marginTop: "12px", marginRight: "12px" }}>
-            <Iconify icon="ic:baseline-plus" />
+              <Iconify icon="ic:baseline-plus" />
               Add User
             </Button>
             <Button variant="outlined" onClick={handleClose} style={{ marginTop: "12px" }}>Close</Button>
@@ -208,14 +230,16 @@ export default function UserPage() {
                 onSelectAllClick={handleSelectAllClick}
                 headLabel={[
                   { id: 'name', label: 'Name' },
-                  { id: 'role', label: 'Role' },  
+                  { id: 'role', label: 'Role' },
                   { id: 'email', label: 'Email' },
-                  { id: 'action', label: 'Action', style: { 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center' // Optional if you want to center vertically
-        /* Add other custom styles here */ 
-      }},
+                  {
+                    id: 'action', label: 'Action', style: {
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center' // Optional if you want to center vertically
+                      /* Add other custom styles here */
+                    }
+                  },
                 ]}
               />
               <TableBody>

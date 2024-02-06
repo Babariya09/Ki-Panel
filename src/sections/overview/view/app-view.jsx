@@ -19,7 +19,7 @@ import Scrollbar from 'src/components/scrollbar';
 import TableEmptyRows from 'src/sections/user/table-empty-rows';
 
 import DashTabelRow from './DashTabelRow';
-import DashTabelHead from './DashTabelHead.jsx';
+import DashTabelHead from './DashTabelHead';
 import AppWidgetSummary from '../app-widget-summary';
 import { emptyRows, applyFilter, getComparator } from '../util';
 
@@ -140,7 +140,7 @@ export default function AppView() {
 
       </Container>
 
-      <Card style={{ marginTop:"20px" }}>
+      <Card style={{ marginTop: "20px" }}>
 
 
         <Scrollbar >
