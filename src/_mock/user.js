@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { sample } from 'lodash';
 import { faker } from '@faker-js/faker';
 

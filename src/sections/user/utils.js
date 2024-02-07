@@ -49,12 +49,13 @@ export function applyFilter({ inputData, comparator, filterName }) {
   if (filterName) {
     const normalizedQuery = filterName.toLowerCase();
     inputData = inputData.filter(
-      (user) =>
-        user.name.toLowerCase().includes(normalizedQuery) ||
-        user.email.toLowerCase().includes(normalizedQuery) ||
-        user.role.toLowerCase().includes(normalizedQuery)
+      (apiData) =>
+      (apiData.name && apiData.name.toLowerCase().includes(normalizedQuery)) ||
+      (apiData.email && apiData.email.toLowerCase().includes(normalizedQuery)) ||
+      (apiData.role && apiData.role.toLowerCase().includes(normalizedQuery))
     );
   }
+  
 
   return inputData;
 }

@@ -1,4 +1,7 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
 
 import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
@@ -25,6 +28,7 @@ import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
 import { emptyRows, applyFilter, getComparator } from '../utils';
+
 
 
 // ----------------------------------------------------------------------
@@ -54,7 +58,53 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
 
-  const [users, setUsers] = useState([]);
+  const [openModal, setModalOpen] = useState(false);
+
+  const [apiData, setApiData] = useState([]);
+
+  const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState(null);
+
+  const [newUserData, setNewUserData] = useState({
+    name: '',
+    email: '',
+    role: '',
+  });
+
+  const [validationErrors, setValidationErrors] = useState({
+    name: '',
+    email: '',
+    role: '',
+  });
+
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(`${BASE_URL}user/list`);
+        console.log("Api", response.data.user);
+        setApiData(response.data.user);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []); // Empty dependency array means the effect runs once after the initial render
+
+  if (loading) {
+    // You can add a loading indicator here if needed
+    return <div>Loading...</div>;
+  }
+
+  if (error) {
+    // Handle error display
+    return <div>Error loading data from the API</div>;
+  }
 
   const handleSort = (event, id) => {
     const isAsc = orderBy === id && order === 'asc';
@@ -66,7 +116,7 @@ export default function UserPage() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelecteds = users.map((n) => n.name);
+      const newSelecteds = apiData.map((n) => n.name);
       setSelected(newSelecteds);
       return;
     }
@@ -105,52 +155,83 @@ export default function UserPage() {
     setFilterName(event.target.value);
   };
 
+  console.log("apiData", apiData);
+
   const dataFiltered = applyFilter({
-    inputData: users,
+    inputData: apiData,
     comparator: getComparator(order, orderBy),
     filterName,
   });
+
+  console.log("dataFiltered=>", dataFiltered);
 
   const notFound = !dataFiltered.length && !!filterName;
 
   // ------ New User Create Modal Open ------
 
-  const [openModal, setModalOpen] = useState(false);
   const handleOpen = () => {
     setModalOpen(true);
   };
 
   const handleClose = () => {
     setModalOpen(false);
+    setValidationErrors({
+      name: '',
+      email: '',
+      role: '',
+    });
   };
 
-  // ---------------- All User Data Show Api Calling ---------------------
+  // ------- ADD USER API CALLING --------- //
+  const handleAddUser = async () => {
+    try {
+      const errs = {};
 
+      if (!newUserData.name) {
+        errs.name = 'Name is required.';
+      }
 
-  // Other state variables and functions remain unchanged
-
-  useEffect(() => {
-    // Define your API endpoint
-    const apiUrl = `${BASE_URL}user/list`;
-
-    // Fetch data from the API
-    fetch(apiUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        // Check if the data is an array before setting it to the state
-        if (Array.isArray(data)) {
-          setUsers(data);
-          console.log("Data", data);
-        } else {
-          console.error('Invalid data format. Expected an array.', data);
-          // You can handle this case by setting users to an empty array or showing an error message
-          setUsers([]);
+      if (!newUserData.email) {
+        errs.email = 'Email is required.';
+      } else {
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(newUserData.email)) {
+          errs.email = 'Invalid email address.';
         }
-      })
-      .catch((error) => {
-        console.error('Error fetching data:', error);
+      }
+
+      if (!newUserData.role) {
+        errs.role = 'Role is required.';
+      }
+
+      setValidationErrors(errs);
+
+      if (Object.values(errs).some(err => err)) {
+        console.error('Validation failed.');
+        return;
+      }
+
+      const userData = { ...newUserData };
+
+      const response = await axios.post(`${BASE_URL}user/register`, userData);
+
+      console.log('User added successfully:', response.data);
+
+      toast.success('User registered successfully!', {
+        position: "top-right",
+        autoClose: 3000, // Close the toast after 3 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
       });
-  }, []);
+
+      handleClose();
+    } catch (err) {
+      console.error('Error adding user:', err);
+    }
+  };
 
   return (
     <Container>
@@ -179,6 +260,13 @@ export default function UserPage() {
                   id="outlined-required"
                   label="Name"
                   style={{ width: "100%" }}
+                  value={newUserData.name}
+                  onChange={(e) => {
+                    setNewUserData({ ...newUserData, name: e.target.value });
+                    setValidationErrors({ ...validationErrors, name: '' }); // Clear error when typing
+                  }}
+                  error={Boolean(validationErrors.name)}
+                  helperText={validationErrors.name}
                 />
               </Grid>
 
@@ -188,6 +276,13 @@ export default function UserPage() {
                   id="outlined-required"
                   label="Email"
                   style={{ width: "100%" }}
+                  value={newUserData.email}
+                  onChange={(e) => {
+                    setNewUserData({ ...newUserData, email: e.target.value });
+                    setValidationErrors({ ...validationErrors, email: '' }); // Clear error when typing
+                  }}
+                  error={Boolean(validationErrors.email)}
+                  helperText={validationErrors.email}
                 />
               </Grid>
 
@@ -196,10 +291,17 @@ export default function UserPage() {
                   id="outlined-required"
                   label="Role"
                   style={{ width: "100%" }}
+                  value={newUserData.role}
+                  onChange={(e) => {
+                    setNewUserData({ ...newUserData, role: e.target.value });
+                    setValidationErrors({ ...validationErrors, role: '' }); // Clear error when typing
+                  }}
+                  error={Boolean(validationErrors.role)}
+                  helperText={validationErrors.role}
                 />
               </Grid>
             </Grid>
-            <Button variant="contained" href="#contained-buttons" style={{ marginTop: "12px", marginRight: "12px" }}>
+            <Button variant="contained" onClick={handleAddUser} style={{ marginTop: "12px", marginRight: "12px" }}>
               <Iconify icon="ic:baseline-plus" />
               Add User
             </Button>
@@ -209,7 +311,23 @@ export default function UserPage() {
 
         {/* ------ Modal Box For New User Create End ------ */}
 
+
       </Stack>
+        {/* --------- Tostar Container Start ----------- */}
+
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+        />
+
+        {/* --------- Tostar Container End ----------- */}
 
       <Card>
         <UserTableToolbar
@@ -224,7 +342,7 @@ export default function UserPage() {
               <UserTableHead
                 order={order}
                 orderBy={orderBy}
-                rowCount={users.length}
+                rowCount={apiData.length}
                 numSelected={selected.length}
                 onRequestSort={handleSort}
                 onSelectAllClick={handleSelectAllClick}
@@ -259,7 +377,7 @@ export default function UserPage() {
 
                 <TableEmptyRows
                   height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                  emptyRows={emptyRows(page, rowsPerPage, apiData.length)}
                 />
 
                 {notFound && <TableNoData query={filterName} />}
@@ -271,7 +389,7 @@ export default function UserPage() {
         <TablePagination
           page={page}
           component="div"
-          count={users.length}
+          count={apiData.length}
           rowsPerPage={rowsPerPage}
           onPageChange={handleChangePage}
           rowsPerPageOptions={[5, 10, 25]}
