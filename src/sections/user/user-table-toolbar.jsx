@@ -79,7 +79,7 @@ export default function UserTableToolbar({ numSelected, filterName, onFilterName
             <Typography variant="h4">Are You Sure!</Typography>
           </Stack>
           <DialogActions style={{ justifyContent: "center", marginBottom: "12px" }}>
-            <Button variant="contained" href="#contained-buttons" onClick={DeleteHandleClose}>
+            <Button variant="contained"  onClick={DeleteHandleClose}>
               Agree
             </Button>
             <Button variant="outlined" onClick={DeleteHandleClose} >Disagree</Button>

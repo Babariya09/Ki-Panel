@@ -1,24 +1,25 @@
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 
-import Box from '@mui/material/Box';
-import Modal from '@mui/material/Modal';
+// import Box from '@mui/material/Box';
+// import Modal from '@mui/material/Modal';
 import Stack from '@mui/material/Stack';
 import Button from '@mui/material/Button';
 import Avatar from '@mui/material/Avatar';
 import Dialog from '@mui/material/Dialog';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
-import Checkbox from '@mui/material/Checkbox';
+// import Checkbox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
-import TextField from '@mui/material/TextField';
+// import TextField from '@mui/material/TextField';
 import TableCell from '@mui/material/TableCell';
-import Grid from '@mui/material/Unstable_Grid2';
+// import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import DialogActions from '@mui/material/DialogActions';
 
-import { useRouter } from 'src/routes/hooks';
+// import { useRouter } from 'src/routes/hooks';
 
 import Iconify from 'src/components/iconify';
 
@@ -27,18 +28,18 @@ import Iconify from 'src/components/iconify';
 // ----------------------------------------------------------------------
 
 
-const style = {
-  position: 'absolute',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 500,
-  bgcolor: 'background.paper',
-  boxShadow: 24,
-  pt: 2,
-  px: 4,
-  pb: 3,
-};
+// const style = {
+//   position: 'absolute',
+//   top: '50%',
+//   left: '50%',
+//   transform: 'translate(-50%, -50%)',
+//   width: 500,
+//   bgcolor: 'background.paper',
+//   boxShadow: 24,
+//   pt: 2,
+//   px: 4,
+//   pb: 3,
+// };
 
 export default function UserTableRow({
   selected,
@@ -46,7 +47,10 @@ export default function UserTableRow({
   avatarUrl,
   email,
   role,
-  handleClick,
+  userId,
+  userToken,
+  // handleClick,
+  onDeleteUser,
 }) {
   const [open, setOpen] = useState(null);
 
@@ -60,15 +64,15 @@ export default function UserTableRow({
 
   // ------ Edit Modal Open ------
 
-  const [openModal, setModalOpen] = useState(false);
-  const handleOpen = () => {
-    setModalOpen(true);
-  };
+  // const [openModal, setModalOpen] = useState(false);
+  // const handleOpen = () => {
+  //   setModalOpen(true);
+  // };
 
-  const handleClose = () => {
-    setModalOpen(false);
-    setOpen(null);
-  };
+  // const handleClose = () => {
+  //   setModalOpen(false);
+  //   setOpen(null);
+  // };
 
   // ------ Delete Modal Open -------
 
@@ -85,19 +89,32 @@ export default function UserTableRow({
 
   // ------ View Modal Open ------
 
-  const router = useRouter();
+  // const router = useRouter();
+  const navigate = useNavigate();
 
   const handleViewMenu = () => {
-    router.push('Dashboard');
+    if (userToken) {
+      navigate(`/Dashboard?token=${userToken}`);
+    }
   }
 
+  // ---------- Delete User API Calling ---------- //
+  const handleDeleteUser = async () => {
+    try {
+      await onDeleteUser(userId);
+
+      DeleteHandleClose();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  };
 
   return (
     <>
       <TableRow hover tabIndex={-1} role="checkbox" selected={selected}>
-        <TableCell padding="checkbox">
+        {/* <TableCell padding="checkbox">
           <Checkbox disableRipple checked={selected} onChange={handleClick} />
-        </TableCell>
+        </TableCell> */}
 
         <TableCell component="th" scope="row" padding="none">
           <Stack direction="row" alignItems="center" spacing={2}>
@@ -130,14 +147,14 @@ export default function UserTableRow({
           sx: { width: 140 },
         }}
       >
-        <MenuItem onClick={handleOpen} sx={{ color: 'green' }}>
+        {/* <MenuItem onClick={handleOpen} sx={{ color: 'green' }}>
           <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
           Edit
-        </MenuItem>
+        </MenuItem> */}
 
         {/* ------ Modal Box For Edit Start ------ */}
 
-        <Modal
+        {/* <Modal
           open={openModal}
           aria-labelledby="child-modal-title"
           aria-describedby="child-modal-description"
@@ -182,12 +199,12 @@ export default function UserTableRow({
               </Grid>
             </Grid>
             <Button variant="contained" href="#contained-buttons" style={{ marginTop: "12px", marginRight: "12px" }}>
-            <Iconify icon="ph:pencil" />
+              <Iconify icon="ph:pencil" />
               Submit
             </Button>
             <Button variant="outlined" onClick={handleClose} style={{ marginTop: "12px" }}>Close</Button>
           </Box>
-        </Modal>
+        </Modal> */}
 
         {/* ------ Modal Box For Edit End ------ */}
 
@@ -208,7 +225,7 @@ export default function UserTableRow({
             <Typography variant="h4">Are You Sure!</Typography>
           </Stack>
           <DialogActions style={{ justifyContent: "center", marginBottom: "12px" }}>
-            <Button variant="contained" href="#contained-buttons" onClick={DeleteHandleClose}>
+            <Button variant="contained" onClick={handleDeleteUser}>
               Agree
             </Button>
             <Button variant="outlined" onClick={DeleteHandleClose} >Disagree</Button>
@@ -232,9 +249,12 @@ export default function UserTableRow({
 
 UserTableRow.propTypes = {
   avatarUrl: PropTypes.any,
-  handleClick: PropTypes.func,
+  // handleClick: PropTypes.func,
   name: PropTypes.any,
   role: PropTypes.any,
   email: PropTypes.any,
+  userId: PropTypes.string,
   selected: PropTypes.any,
+  onDeleteUser: PropTypes.func,
+  userToken: PropTypes.string
 };

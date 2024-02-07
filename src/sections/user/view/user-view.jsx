@@ -16,6 +16,7 @@ import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+import CircularProgress from '@mui/material/CircularProgress';
 
 import { BASE_URL } from 'src/Base_Url/Baseurl';
 
@@ -78,8 +79,6 @@ export default function UserPage() {
     role: '',
   });
 
-
-
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -87,23 +86,35 @@ export default function UserPage() {
         console.log("Api", response.data.user);
         setApiData(response.data.user);
       } catch (err) {
+        console.error('Error loading data from the API:', err);
         setError(err);
+        toast.error('Error loading data from the API', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchData();
-  }, []); // Empty dependency array means the effect runs once after the initial render
+  }, []);
 
-  if (loading) {
-    // You can add a loading indicator here if needed
-    return <div>Loading...</div>;
+  if (loading || apiData.length === 0) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <CircularProgress style={{ color: '#000000' }} />
+      </div>
+    );
   }
 
   if (error) {
-    // Handle error display
-    return <div>Error loading data from the API</div>;
+    return null;
   }
 
   const handleSort = (event, id) => {
@@ -217,6 +228,8 @@ export default function UserPage() {
 
       console.log('User added successfully:', response.data);
 
+      setApiData(prevData => [...prevData, response.data.user]);
+
       toast.success('User registered successfully!', {
         position: "top-right",
         autoClose: 3000, // Close the toast after 3 seconds
@@ -230,6 +243,29 @@ export default function UserPage() {
       handleClose();
     } catch (err) {
       console.error('Error adding user:', err);
+    }
+  };
+
+  // ------ Delete User API Calling ------- //
+
+  const handleDeleteUser = async (userId) => {
+    try {
+      await axios.delete(`${BASE_URL}user/delete/${userId}`);
+
+      const response = await axios.get(`${BASE_URL}user/list`);
+      setApiData(response.data.user);
+
+      toast.success('User deleted successfully!', {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } catch (err) {
+      console.error('Error deleting user:', err);
     }
   };
 
@@ -313,21 +349,21 @@ export default function UserPage() {
 
 
       </Stack>
-        {/* --------- Tostar Container Start ----------- */}
+      {/* --------- Tostar Container Start ----------- */}
 
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-        />
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
 
-        {/* --------- Tostar Container End ----------- */}
+      {/* --------- Tostar Container End ----------- */}
 
       <Card>
         <UserTableToolbar
@@ -354,8 +390,7 @@ export default function UserPage() {
                     id: 'action', label: 'Action', style: {
                       display: 'flex',
                       justifyContent: 'center',
-                      alignItems: 'center' // Optional if you want to center vertically
-                      /* Add other custom styles here */
+                      alignItems: 'center'
                     }
                   },
                 ]}
@@ -369,9 +404,12 @@ export default function UserPage() {
                       name={row.name}
                       role={row.role}
                       email={row.email}
-                      avatarUrl={row.avatarUrl}
+                      avatarUrl={row.avatarUrl || 'https://example.com/default-avatar.jpg'}
+                      userToken={row.token}
+                      userId={row._id}
                       selected={selected.indexOf(row.name) !== -1}
                       handleClick={(event) => handleClick(event, row.name)}
+                      onDeleteUser={handleDeleteUser}
                     />
                   ))}
 

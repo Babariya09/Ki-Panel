@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
 import Card from '@mui/material/Card';
 // import Stack from '@mui/material/Stack';
@@ -17,6 +18,8 @@ import { DashUSer } from 'src/_mock/dash';
 import Scrollbar from 'src/components/scrollbar';
 
 import TableEmptyRows from 'src/sections/user/table-empty-rows';
+
+// import { useRouter } from 'src/routes/hooks';
 
 import DashTabelRow from './DashTabelRow';
 import DashTabelHead from './DashTabelHead';
@@ -37,6 +40,18 @@ export default function AppView() {
   const [orderBy, setOrderBy] = useState('name');
 
   const [rowsPerPage, setRowsPerPage] = useState(5);
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const token = searchParams.get('token');
+
+  useEffect(() => {
+    // Do something with the token
+    if (token) {
+      console.log('Token in AppView:', token);
+      // Perform actions with the token, such as API calls
+    }
+  }, [token]);
 
 
   const handleSort = (event, id) => {
