@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -13,6 +14,7 @@ import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
 
 import { DashUSer } from 'src/_mock/dash';
+import { BASE_URL } from 'src/Base_Url/Baseurl';
 
 // import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -46,10 +48,22 @@ export default function AppView() {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    // Do something with the token
     if (token) {
       console.log('Token in AppView:', token);
-      // Perform actions with the token, such as API calls
+
+      // Replace {{BASE_URL}} with your actual base URL
+      const apiUrl = `${BASE_URL}user/profile/${token}`;
+
+      axios.get(apiUrl)
+        .then(response => {
+          // Handle the API response here
+          console.log('API Response:', response.data);
+          // Perform actions with the response data
+        })
+        .catch(error => {
+          // Handle errors here
+          console.error('API Error:', error);
+        });
     }
   }, [token]);
 
