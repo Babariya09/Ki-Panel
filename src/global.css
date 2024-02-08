@@ -5,4 +5,7 @@
     display: flex !important;
     justify-content: center !important;
 }
-    
+
+.css-1sos3zc-MuiStack-root>:not(style):not(style) {
+    margin: 10px !important;
+}

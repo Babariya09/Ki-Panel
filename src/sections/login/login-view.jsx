@@ -1,7 +1,10 @@
+import axios from 'axios';
 import { useState } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
 
 import Box from '@mui/material/Box';
-import Link from '@mui/material/Link';
+// import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import TextField from '@mui/material/TextField';
@@ -14,6 +17,7 @@ import InputAdornment from '@mui/material/InputAdornment';
 import { useRouter } from 'src/routes/hooks';
 
 import { bgGradient } from 'src/theme/css';
+import { BASE_URL } from 'src/Base_Url/Baseurl';
 
 import Logo from 'src/components/logo';
 import Iconify from 'src/components/iconify';
@@ -25,22 +29,88 @@ export default function LoginView() {
 
   const router = useRouter();
 
+  const [username, setUser] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [usernameError, setUsernameError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
 
-  const handleClick = () => {
-    router.push('/user');
-    localStorage.setItem("login", true)
+  const handleClick = async () => {
+    try {
+      // Form validation
+      if (!username) {
+        setUsernameError('Username is required');
+        return;
+      }
+
+      if (!password) {
+        setPasswordError('Password is required');
+        return;
+      }
+
+      const response = await axios.post(`${BASE_URL}user/admin/login`, {
+        username,
+        password,
+      });
+
+      toast.success('Login successfully!', {
+        position: "top-right",
+        autoClose: 3000, // Close the toast after 3 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+
+      router.push('/user');
+
+      console.log("asasdas", response);
+
+      // Rest of your code...
+    } catch (error) {
+      toast.error("Login Error", {
+        position: "top-right",
+        autoClose: 3000, // Close the toast after 3 seconds
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      console.error('Login failed:', error.response ? error.response.data : error.message);
+      // Handle the error, show a message, or perform other actions
+    }
   };
+
+
 
   const renderForm = (
     <>
       <Stack spacing={3}>
-        <TextField name="email" label="Email address" />
+        <TextField
+          name="user"
+          label="Username"
+          value={username}
+          onChange={(e) => {
+            setUser(e.target.value);
+            setUsernameError(''); // Clear previous error
+          }}
+          error={!!usernameError}
+          helperText={usernameError}
+        />
 
         <TextField
           name="password"
           label="Password"
           type={showPassword ? 'text' : 'password'}
+          value={password}
+          onChange={(e) => {
+            setPassword(e.target.value);
+            setPasswordError(''); // Clear previous error
+          }}
+          error={!!passwordError}
+          helperText={passwordError}
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
@@ -53,10 +123,26 @@ export default function LoginView() {
         />
       </Stack>
 
+      {/* --------- Tostar Container Start ----------- */}
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+      />
+
+      {/* --------- Tostar Container End ----------- */}
+
       <Stack direction="row" alignItems="center" justifyContent="flex-end" sx={{ my: 3 }}>
-        <Link variant="subtitle2" underline="hover">
+        {/* <Link variant="subtitle2" underline="hover">
           Forgot password?
-        </Link>
+        </Link> */}
       </Stack>
 
       <LoadingButton
